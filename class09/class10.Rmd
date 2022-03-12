@@ -1,0 +1,71 @@
+---
+title: "class10"
+author: "Phoebe LI"
+date: "2/18/2022"
+output: pdf_document
+---
+# genotype data from 1000 Genomes
+
+Let us determine the frequency of different alleles MXL population
+
+```{r}
+# import the csv file
+mxl <- read.csv("373531-SampleGenotypes-Homo_sapiens_Variation_Sample_rs8067378.csv")
+head(mxl)
+```
+```{r}
+mxl$Genotype..forward.strand.
+```
+
+```{r}
+table(mxl$Genotype..forward.strand.)/nrow(mxl)
+```
+
+
+Downloaded another data set British in England and Scotland
+```{r}
+GBR <- read.csv("373522-SampleGenotypes-Homo_sapiens_Variation_Sample_rs8067378.csv")
+GBR
+```
+
+
+```{r}
+table(GBR$Genotype..forward.strand.)/nrow(GBR)
+```
+
+```{r}
+x<-read.table("rs8067378_ENSG00000172057.6.txt")
+head(x)
+```
+```{r}
+summary(x[x$geno=="G/G",]$exp)
+```
+```{r}
+table(x$geno)
+```
+
+
+```{r}
+x[x$geno=="G/G",]
+```
+```{r}
+summary(x[x$geno=="A/G",]$exp)
+```
+
+```{r}
+summary(x[x$geno=="A/A",]$exp)
+```
+
+
+```{r}
+head(x)
+```
+
+```{r}
+library(ggplot2)
+ggplot(x)+
+  aes(x= geno, y= exp)+
+  geom_boxplot()+
+  labs(x= "Genotype", y= "Expression")
+```
+

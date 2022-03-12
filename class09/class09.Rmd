@@ -1,0 +1,158 @@
+---
+title: "class09"
+author: "Phoebe LI"
+date: "2/13/2022"
+output: pdf_document
+---
+```{r}
+# import the csv file
+db <- read.csv("Data Export Summary.csv", row.names = 1)
+db
+
+# Xray structure percent
+xray.percent <- sum(db$X.ray)/sum(db$Total)*100
+round(xray.percent, 2)
+
+# EM structure percent
+EM.percent <- sum(db$EM)/sum(db$Total)*100
+round(EM.percent, 2)
+```
+
+
+>Q1: What percentage of structures in the PDB are solved by X-Ray and Electron Microscopy.
+
+x-ray:87.2%  EM:5.39%
+
+
+>Q2: What proportion of structures in the PDB are protein?
+
+```{r}
+
+percent.protein <- (db$Total[1])/sum(db$Total)
+round(percent.protein*100, 2)
+
+```
+
+
+>Q3: Type HIV in the PDB website search box on the home page and determine how many HIV-1 protease structures are in the current PDB?
+
+4486 Structures
+
+
+>Q4: Water molecules normally have 3 atoms. Why do we see just one atom per water molecule in this structure?
+
+Because It does not show the H atom in this structure. The resolution is too low that they can not detect H atom.
+
+> Q5: There is a conserved water molecule in the binding site. Can you identify this water molecule? What residue number does this water molecule have (see note below)?
+
+OH308O
+
+
+####  Introduction to Bio3D in R
+```{r}
+install.packages("bio3d", repos="http://cran.us.r-project.org")
+library(bio3d)
+```
+
+## Reading PDB file data into R
+
+```{r}
+pdb <- read.pdb("1hsg")
+pdb
+```
+
+```{r}
+attributes(pdb)
+head(pdb$atom)
+```
+
+> Q7: How many amino acid residues are there in this pdb object? 
+
+PQITLWQRPLVTIKIGGQLKEALLDTGADDTVLEEMSLPGRWKPKMIGGIGGFIKVRQYD
+      QILIEICGHKAIGTVLVGPTPVNIIGRNLLTQIGCTLNFPQITLWQRPLVTIKIGGQLKE
+      ALLDTGADDTVLEEMSLPGRWKPKMIGGIGGFIKVRQYDQILIEICGHKAIGTVLVGPTP
+      VNIIGRNLLTQIGCTLNF
+      
+      198 amino acid residues
+      
+> Q8: Name one of the two non-protein residues? 
+
+ HOH
+ 
+> Q9: How many protein chains are in this structure? 
+
+2 chains
+
+
+
+
+
+>Q10. Which of the packages above is found only on BioConductor and not CRAN? 
+
+ msa
+
+>Q11. Which of the above packages is not found on BioConductor or CRAN?: 
+
+bio3d-view
+
+>Q12. True or False? Functions from the devtools package can be used to install packages from GitHub and BitBucket? 
+
+True
+
+>Q13
+
+```{r}
+options(repos = list(CRAN="http://cran.rstudio.com/"))
+install.packages("bio3d")
+install.packages("ggplot2")
+install.packages("ggrepel")
+install.packages("devtools")
+install.packages("BiocManager")
+
+BiocManager::install("msa")
+devtools::install_bitbucket("Grantlab/bio3d-view")
+```
+```{r}
+library(bio3d)
+aa <- get.seq("1ake_A")
+```
+
+```{r}
+aa
+```
+
+> Q13. How many amino acids are in this sequence, i.e. how long is this sequence? 
+214
+
+```{r}
+hits <- NULL
+hits$pdb.id <- c('1AKE_A','6S36_A','6RZE_A','3HPR_A','1E4V_A','5EJE_A','1E4Y_A','3X2S_A','6HAP_A','6HAM_A','4K46_A','3GMT_A','4PZL_A')
+```
+
+```{r}
+files <- get.pdb(hits$pdb.id, path="pdbs", split=TRUE, gzip=TRUE)
+pdbs <- pdbaln(files, fit = TRUE)
+```
+
+```{r}
+# Vector containing PDB codes for figure axis
+ids <- basename.pdb(pdbs$id)
+
+# Draw schematic alignment
+plot(pdbs, labels=ids)
+```
+### Viewing our superposed structures
+
+```{r}
+install.packages("rgl")
+library(bio3d.view)
+library(rgl)
+
+view.pdbs(pdbs)
+```
+
+```{r}
+setwd(dudu/BGGN213/class09/PhoebeLi)
+
+```
+
