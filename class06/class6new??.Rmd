@@ -1,0 +1,245 @@
+---
+title: "class6"
+author: "Phoebe LI"
+date: "2/13/2022"
+output: html_document
+---
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+We can write text of course just like any file. We
+can **style text
+```{r}
+
+```
+
+Do :
+
+- this
+-and that
+-and another thing
+
+This is more text
+and this a new line
+
+---
+
+we can include some code:
+
+```{r}
+plot(1:10)
+```
+
+```{r}
+# This is a comment and will not be to R
+plot(cars)
+```
+```{r}
+
+```
+
+## Time to write a function
+
+> **Q1**. Write a function grade() to determine an overall grade from a vector of student homework
+assignment scores dropping the lowest single score. If a student misses a homework (i.e. has an
+NA value) this can be used as a score to be potentially dropped. Your final function should be
+adquately explained with code comments and be able to work on an example class gradebook
+such as this one in CSV format: “https://urldefense.proofpoint.com/v2/url?u=https-3A__tinyurl.com_gradeinput-25C3-25A2&d=DwIGAw&c=-35OiAkTchMrZOngvJPOeA&r=1eeYiVnpi6GuTHHj4Q58Ig&m=DRKZ8KtZXkjKttHZO3O7EqYeh2fRyq8XmhIhuLo69AZN-Zpxe8jeU2QLHAao2q4S&s=wtn9GEwNwNfCQtVcCHceYdY5yd9FyU31iesjgte30vo&e= ?? [3pts]
+
+
+
+
+
+
+First i want to find the lowest score. I can use the **min()** to find it and the **which.min()** function to find where it is (i,e its position in the vector).
+
+```{r}
+# Example input vectors to start with
+student1 <- c(100, 100, 100, 100, 100, 100, 100, 90)
+student2 <- c(100, NA, 90, 90, 90, 90, 97, 80)
+student3 <- c(90, NA, NA, NA, NA, NA, NA, NA)
+
+```
+```{r}
+which.min(student1)
+```
+```{r}
+student1[ -which.min(student1)]
+```
+i can use minus to get everything in the vector but the lowest score. 
+ 
+Now i can call for thr **mean()** function to get the average.
+```{r}
+mean(student1[ -which.min(student1)])
+```
+```{r}
+student2
+which.mean(student2)])
+```
+
+```{r}
+mean(student2, na.rm = TRUE)
+```
+```{r}
+student3
+```
+
+one great idea is to change or replace the NA values with zero. lets do it.
+
+The internet gods told me to try this 
+```{r}
+which(is.na(student2))
+```
+The is.na() function returns a logical vector where TRUE elements indicate the presence of NA values.
+```{r}
+is.na(student2)
+```
+
+
+```{r}
+student2[ is.na]
+```
+
+lets replace NAs with zero
+
+```{r}
+student.prime <- student3
+student.prime[ is.na(student.prime)] = 0
+stuent.prime
+```
+
+ok we are so close lets put these bits
+
+```{r}
+student.prime <- student2
+student.prime[ is.na(student.prime)] = 0
+mean(student.prime[ -which.min(student.prime)])
+```
+```{r}
+x <- 1:5
+x
+x[2] = 100
+x
+x[3] = 200
+```
+hOW about student3?
+```{r}
+student.prime <- student3
+student.prime[ is.na(student.prime)] = 0
+mean(student.prime[ -which.min(student.prime)])
+```
+
+great we got it. this works. lets simplify this and make it clear
+
+
+we can make the object names more clear
+
+```{r}
+x <- student3
+x[ is.na(student.prime)] = 0
+mean(x[ -which.min(student.prime)])
+```
+
+Doh! eeijt barry entered the wrong code
+```{r}
+student4 <- c(100, NA, 90, "90", 90, 90, 97, 80)
+```
+
+```{r}
+as.numeric(student4)
+```
+```{r}
+as.numeric(student4)
+```
+
+```{r}
+x <- student4
+x <- as.numeric(x)
+x[ is.na(x)] = 0
+mean(x[ -which.min(x)])
+```
+
+noe finally we canwite our function:
+Al functions have at least 3 things 
+a name, imout args abd a body.
+
+```{r}
+grade <- function(x) {
+  x <- as.numeric(x)
+x[ is.na(x)] = 0
+mean(x[ -which.min(x)])
+}
+```
+
+```{r}
+grade(student1)
+```
+
+First we got to read the gradebook for teh class.
+
+```{r}
+gradebook <- "https://urldefense.proofpoint.com/v2/url?u=https-3A__tinyurl.com_gradeinput&d=DwIGAw&c=-35OiAkTchMrZOngvJPOeA&r=1eeYiVnpi6GuTHHj4Q58Ig&m=DRKZ8KtZXkjKttHZO3O7EqYeh2fRyq8XmhIhuLo69AZN-Zpxe8jeU2QLHAao2q4S&s=rauPa6Wl4Ax1RnpvkygjFsIjgO_qG0KkCmqz8_hV56I&e= "
+scores <- read.csv(gradebook, row.names = 1)
+scores
+```
+
+We are goign to use the supper useful **apply()** function to grade all the students with our **grade()** function.
+
+```{r}
+apply(scores, 1, grade)
+```
+```{r}
+apply(scores, 1, grade)
+```
+
+```{r}
+which.max(ans)
+```
+
+
+question 3: which question was the toughest
+here we will 
+
+```{r}
+apply(scores,2,mean, na.rm=TRUE)
+```
+
+Replace or mask NA values to zero
+```{r}
+mask <- scores
+```
+
+```{r}
+mask <- scores
+mask[is.na(mask)] = 0
+mask
+```
+
+```{r}
+apply(mask,2,mean)
+```
+
+```{r}
+cor(mask$hw5, ans)
+```
+
+I can call the **cor()** for every homework and get a value for each but that sucks. lets use **()** and do them all in one go.
+
+```{r}
+apply(mask,2,cor, ans)
+```
+
