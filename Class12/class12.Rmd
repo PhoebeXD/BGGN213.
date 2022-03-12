@@ -1,0 +1,189 @@
+---
+title: "class12"
+author: "Phoebe LI"
+date: "2/25/2022"
+output: pdf_document
+---
+1. input our counts and metadata files.
+-check the format and fix if necessary
+
+2. Run differential expression analysis
+-setup that object required by deseq()
+-run deseq
+
+3. Add annotation
+-gene names and something else 
+
+4. Volcano plot
+
+5. Pathway analysis
+
+6. Save results
+
+7. Go have fun!
+
+```{r setup, message=FALSE}
+library(DESeq2)
+library(ggplot2)
+library(AnnotationDbi)
+library(org.Hs.eg.db)
+library(gage)
+library(gageData)
+library(pathview)
+```
+
+#input counts and metadata
+```{r readcvs}
+countdf<- read.csv("GSE37704_featurecounts.csv", row.names = 1)
+colData<- read.csv("GSE37704_metadata.csv")
+
+#head(countdf)
+countData<- countdf[,-1]
+head(countData)
+
+```
+
+```{r}
+#all(colData$id==colnames(countData))
+```
+
+```{r}
+#head(countData)
+counts <- countData[rowSums(countData) != 0, ]
+head(counts)
+#head(countData)
+```
+
+## Principle component Analysis
+
+```{r}
+pca<-prcomp(t(counts), scale=TRUE)
+summary(pca)
+```
+```{r}
+plot(pca$x[,1], pca$x[,2], xlab="PC1", ylab="PC2")
+```
+
+```{r}
+#plot(pca$x[,1], pca$x[,2], xlab="PC1", ylab="PC2", col=colData$condition)
+plot(pca$x[,1:2],col=as.factor(colData$condition),pch=16)
+```
+
+
+
+## DESeq Analysis
+
+```{r}
+dds<- DESeqDataSetFromMatrix(countData = counts,
+                       colData = colData,
+                       design = ~condition)
+```
+Run our DESeq analysis
+```{r}
+dds<-DESeq(dds)
+res<-results(dds)
+head(res)
+```
+
+
+## Add Annotation
+
+```{r}
+columns(org.Hs.eg.db)
+
+res$symbol = mapIds(org.Hs.eg.db,
+                    keys=row.names(counts), 
+                    keytype="ENSEMBL",
+                    column="SYMBOL",
+                    multiVals="first")
+
+res$entrez = mapIds(org.Hs.eg.db,
+                    keys=row.names(counts),
+                    keytype="ENSEMBL",
+                    column="ENTREZID",
+                    multiVals="first")
+
+res$name =   mapIds(org.Hs.eg.db,
+                    keys=row.names(res),
+                    keytype="ENSEMBL",
+                    column="GENENAME",
+                    multiVals="first")
+head(res, 10)
+```
+
+
+```{r}
+ plot( res$log2FoldChange, -log(res$padj) )
+```
+
+
+```{r}
+# Make a color vector for all genes
+mycols <- rep("gray", nrow(res) )
+
+# Color red the genes with absolute fold change above 2
+mycols[ abs(res$log2FoldChange) > 2 ] <- "red"
+
+# Color blue those with adjusted p-value less than 0.01
+#  and absolute fold change more than 2
+inds <- ((res$pvalue)<0.01) & (abs(res$log2FoldChange) > 2 )
+mycols[ inds ] <- "blue"
+
+plot( res$log2FoldChange, -log(res$padj), col=mycols, xlab="Log2(FoldChange)", ylab="-Log(P-value)" )
+```
+## pathway analysis
+
+```{r}
+foldchanges = res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+```
+
+
+```{r}
+library(pathview)
+library(gage)
+library(gageData)
+data(sigmet.idx.hs)
+data(kegg.sets.hs)
+
+kegg.sets.hs = kegg.sets.hs[sigmet.idx.hs]
+head(kegg.sets.hs, 3)
+```
+
+
+```{r}
+keggres = gage(foldchanges, gsets=kegg.sets.hs)
+attributes(keggres)
+```
+
+```{r}
+head(keggres$less)
+```
+
+```{r}
+pathview(gene.data=foldchanges, pathway.id="hsa04110")
+```
+
+## Section 3. Gene Ontology (GO)
+
+```{r}
+data (go.sets.hs)
+data (go.subs.hs)
+
+# Focus on Biological Process subset of GO
+gobpsets = go.sets.hs[go.subs.hs$BP]
+
+gobpres = gage(foldchanges, gsets=gobpsets, same.dir=TRUE)
+
+lapply(gobpres, head)
+```
+
+
+
+
+```{r}
+res = res[order(res$pvalue),]
+write.csv(res, file="deseq_results.csv")
+```
+
